@@ -93,8 +93,8 @@ void SinegeneratorAudioProcessor::changeProgramName (int index, const juce::Stri
 //==============================================================================
 void SinegeneratorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    currentSampleRate = sampleRate;
+    phase = 0.0;//
 }
 
 void SinegeneratorAudioProcessor::releaseResources()
@@ -143,19 +143,23 @@ void SinegeneratorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+    // how far the phase moves each sample
+    double phaseStep = juce::MathConstants<double>::twoPi * frequency / currentSampleRate;
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-        auto* channelData = buffer.getWritePointer (channel);
+        // the wave's value right now
+        float value = amplitude * (float)std::sin(phase);
 
-        // ..do something to the data...
+        for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+            buffer.setSample(channel, sample, value);
+
+        // move forward, and wrap back once past one full cycle
+        phase += phaseStep;
+        if (phase >= juce::MathConstants<double>::twoPi)
+            phase -= juce::MathConstants<double>::twoPi;
     }
+
 }
 
 //==============================================================================

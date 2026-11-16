@@ -55,5 +55,9 @@ public:
 
 private:
     //==============================================================================
+    double currentSampleRate = 44100.0; // samples per second, set properly in prepareToPlay
+    double phase = 0.0;                 // where we are in the wave, from 0 to 2π
+    float frequency = 440.0f;           // pitch in Hz (440 is the note A)
+    float amplitude = 0.2f;             // volume from 0 to 1, kept low to protect your ears
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SinegeneratorAudioProcessor)
 };

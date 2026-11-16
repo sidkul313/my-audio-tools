@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="oCP6Wm" name="Sine-generator" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginCharacteristicsValue="pluginIsSynth">
   <MAINGROUP id="Eybn3A" name="Sine-generator">
     <GROUP id="{52204867-1113-33A7-A2E3-C72FE0F710DC}" name="Source">
       <FILE id="vnUlQA" name="PluginProcessor.cpp" compile="1" resource="0"
