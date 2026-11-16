@@ -11,17 +11,24 @@
 
 //==============================================================================
 SinegeneratorAudioProcessor::SinegeneratorAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       )
-#endif
+    : AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true)),
+    apvts(*this, nullptr, "Parameters", createParameterLayout())
 {
+    frequencyParam = apvts.getRawParameterValue("frequency");
+    playParam = apvts.getRawParameterValue("play");
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout SinegeneratorAudioProcessor::createParameterLayout()
+{
+    juce::NormalisableRange<float> range(20.0f, 20000.0f);
+    range.setSkewForCentre(1000.0f); // gives the low notes more of the knob's turn
+
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ "frequency", 1 }, "Frequency", range, 440.0f));
+    layout.add(std::make_unique<juce::AudioParameterBool>(
+        juce::ParameterID{ "play", 1 }, "Play", false));
+    return layout;
 }
 
 SinegeneratorAudioProcessor::~SinegeneratorAudioProcessor()
@@ -143,8 +150,13 @@ void SinegeneratorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+    if (playParam->load() < 0.5f) // play is off
+    {
+        buffer.clear();           // output silence
+        return;                   // and skip the oscillator
+    }
     // how far the phase moves each sample
-    double phaseStep = juce::MathConstants<double>::twoPi * frequency / currentSampleRate;
+    double phaseStep = juce::MathConstants<double>::twoPi * frequencyParam->load() / currentSampleRate;
 
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
     {

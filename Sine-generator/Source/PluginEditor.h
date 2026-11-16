@@ -28,6 +28,13 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SinegeneratorAudioProcessor& audioProcessor;
+    juce::Slider frequencyKnob;
+    juce::Label frequencyLabel;
+    juce::TextButton playButton{ "Play" };
+
+    //connecting controls to the processor
+    juce::AudioProcessorValueTreeState::SliderAttachment frequencyAttachment;
+    juce::AudioProcessorValueTreeState::ButtonAttachment playAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SinegeneratorAudioProcessorEditor)
 };
