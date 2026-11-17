@@ -9,7 +9,7 @@ A simple synth plugin that plays a pure sine wave.
 - **Frequency knob:** 20 Hz to 20,000 Hz, weighted so the low notes get more of the turn. Drag the knob up or down, or click the number and type an exact value.
 - **Play button:** starts and stops the tone. It's off when the plugin opens, so it never starts making noise unexpectedly.
 
-It builds as a **VST3** plugin, for use in a DAW, and as a **standalone app**.
+It builds as a **VST3** plugin, for use in a DAW such as Ableton Live, and as a **standalone app**.
 
 ## Building on Windows
 
@@ -31,6 +31,29 @@ It builds as a **VST3** plugin, for use in a DAW, and as a **standalone app**.
 5. In Visual Studio's Solution Explorer, right-click **Sine-generator_StandalonePlugin**, choose **Set as Startup Project**, and press **F5**.
 
 The `Builds` and `JuceLibraryCode` folders aren't stored in the repo. Projucer creates them when you save in step 4.
+
+## Installing the plugin in a DAW (VST3)
+
+1. In Visual Studio, change the dropdown at the top from **Debug** to **Release**.
+2. In Solution Explorer, right-click **Sine-generator_VST3** and choose **Build**. If the build ends with an `MSB3073` "copy" error, the plugin was still built. Only the automatic install step failed, because it needs admin rights.
+3. Close your DAW, then open PowerShell **as administrator** and run:
+   ```powershell
+   $vst = Get-ChildItem "$HOME\Documents\my-audio-tools" -Recurse -Directory -Filter "*.vst3" | Where-Object FullName -like "*Release*" | Select-Object -First 1
+   Copy-Item $vst.FullName "C:\Program Files\Common Files\VST3\" -Recurse -Force
+   "Installed: $($vst.Name)"
+   ```
+   Change the first path if you cloned the repo somewhere other than `Documents`. This copies `Sine-generator.vst3` into the standard Windows VST3 folder.
+4. Open your DAW and rescan plugins.
+
+### Ableton Live
+
+- Go to **Options → Settings → Plug-Ins**, turn on **Use VST3 Plug-In System Folders**, and click **Rescan**. If the plugin still loads with old settings, hold **Alt** while clicking Rescan to force a full rescan (slower if you have many plugins).
+- In the browser, open **Plug-Ins → VST3**. The plugin is listed under the manufacturer name set in Projucer.
+- Drag **Sine-generator** onto a **MIDI track**, open its window from the device's title bar, and press **Play**.
+
+The plugin is set as a synth with MIDI input in Projucer (**Plugin is a Synth** and **Plugin MIDI Input**). That lets Ableton treat it as an instrument. MIDI notes are currently ignored, and the knob sets the pitch.
+
+To update after changing the code, rebuild in Release, close the DAW, run step 3 again, and rescan.
 
 ## Project layout
 
